@@ -144,16 +144,21 @@ function integerToRGBA(number) {
 }
 
 // src/exporter.ts
-function generateOutput(listOfAnnotations, mrexptTFile, colorMappings, enableNewExporter) {
+function generateOutput(listOfAnnotations, mrexptTFile, colorMappings, enableNewExporter, includeFrontmatter) {
   const sample = listOfAnnotations[0];
   if (!sample)
     return "";
   const colorToCallout = new Map();
   for (const mapping of colorMappings) {
-    colorToCallout.set(mapping.signedColor, mapping.calloutType);
+    colorToCallout.set(mapping.signedColor, {
+      type: mapping.calloutType,
+      title: mapping.calloutTitle || ""
+    });
   }
   const selectedColors = new Set(colorMappings.map((m) => m.signedColor));
-  let output = `---
+  let output = "";
+  if (includeFrontmatter) {
+    output += `---
 path: "${mrexptTFile.path}"
 title: "${sample.bookName}"
 author: 
@@ -164,6 +169,7 @@ tags:
 ---
 
 `;
+  }
   const filteredAnnotations = listOfAnnotations.filter((a) => selectedColors.has(a.signedColor));
   for (const annotation of filteredAnnotations) {
     if (annotation.highlightText || annotation.noteText) {
@@ -194,11 +200,17 @@ ${highlight.split("\n").map((t) => `> ${t}`).join("\n")}
 ${note.split("\n").map((t) => `> ${t}`).join("\n")}
 `;
   } else {
-    const calloutType = colorToCallout.get(signedColor) || integerToRGBA(signedColor).slice(0, 6);
+    const mapped = colorToCallout.get(signedColor);
+    const calloutType = (mapped == null ? void 0 : mapped.type) || integerToRGBA(signedColor).slice(0, 6);
+    const calloutTitle = (mapped == null ? void 0 : mapped.title) || "";
     if (highlight.includes("\n")) {
       highlight = highlight.replaceAll("\n", "\n> ");
     }
-    let result = `> [!${calloutType}]
+    let calloutHeader = `> [!${calloutType}]`;
+    if (calloutTitle) {
+      calloutHeader += ` ${calloutTitle}`;
+    }
+    let result = `${calloutHeader}
 `;
     result += `> ${highlight}
 `;
@@ -229,6 +241,10 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
       this.plugin.settings.exportsPath = value;
       yield this.plugin.saveSettings();
     })));
+    new import_obsidian2.Setting(containerEl).setName("Include file header (frontmatter)").setDesc("Add YAML frontmatter (path, title, timestamp, tags) at the top of the output. Turn off if you have your own note structure.").addToggle((toggle) => toggle.setValue(this.plugin.settings.includeFrontmatter).onChange((value) => __async(this, null, function* () {
+      this.plugin.settings.includeFrontmatter = value;
+      yield this.plugin.saveSettings();
+    })));
     new import_obsidian2.Setting(containerEl).setName("Experimental Support for SRS").setDesc(createFragment((frag) => {
       frag.appendText("Enable support for ");
       frag.createEl("a", {
@@ -244,7 +260,7 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
     containerEl.createEl("hr");
     containerEl.createEl("h3", { text: "Color \u2192 Callout Mapping" });
     containerEl.createEl("p", {
-      text: "Map each Moon+ Reader highlight color to an Obsidian callout type. Only enabled mappings will be imported. When you parse an export, you can also choose which to include."
+      text: "Map each Moon+ Reader highlight color to an Obsidian callout type. You can also set a custom title that appears after the callout type, e.g. [!quote] My Custom Title."
     });
     const mappings = this.plugin.settings.colorMappings;
     if (mappings.length === 0) {
@@ -258,6 +274,7 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
       this.plugin.settings.colorMappings.push({
         signedColor: 0,
         calloutType: "note",
+        calloutTitle: "",
         enabled: true
       });
       yield this.plugin.saveSettings();
@@ -265,13 +282,13 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
     })));
     new import_obsidian2.Setting(containerEl).setName("Reset to defaults").setDesc("Remove all custom mappings and restore defaults").addButton((btn) => btn.setButtonText("Reset").setWarning().onClick(() => __async(this, null, function* () {
       this.plugin.settings.colorMappings = [
-        { signedColor: -11184811, calloutType: "cite", enabled: true },
-        { signedColor: -2029999361, calloutType: "quote", enabled: true },
-        { signedColor: -2013331371, calloutType: "note", enabled: true },
-        { signedColor: -2013294080, calloutType: "warning", enabled: true },
-        { signedColor: -2013266176, calloutType: "important", enabled: true },
-        { signedColor: -1543340033, calloutType: "info", enabled: true },
-        { signedColor: -1525467669, calloutType: "tip", enabled: true }
+        { signedColor: -11184811, calloutType: "cite", calloutTitle: "", enabled: true },
+        { signedColor: -2029999361, calloutType: "quote", calloutTitle: "", enabled: true },
+        { signedColor: -2013331371, calloutType: "note", calloutTitle: "", enabled: true },
+        { signedColor: -2013294080, calloutType: "warning", calloutTitle: "", enabled: true },
+        { signedColor: -2013266176, calloutType: "important", calloutTitle: "", enabled: true },
+        { signedColor: -1543340033, calloutType: "info", calloutTitle: "", enabled: true },
+        { signedColor: -1525467669, calloutType: "tip", calloutTitle: "", enabled: true }
       ];
       yield this.plugin.saveSettings();
       this.display();
@@ -288,9 +305,12 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
       });
       frag.appendText(`#${hexColor}`);
     }));
-    setting.setDesc(`Moon+ Reader color code: ${mapping.signedColor}`);
-    setting.addText((text) => text.setPlaceholder("callout type").setValue(mapping.calloutType).onChange((value) => __async(this, null, function* () {
+    setting.addText((text) => text.setPlaceholder("type (e.g. note)").setValue(mapping.calloutType).onChange((value) => __async(this, null, function* () {
       this.plugin.settings.colorMappings[index].calloutType = value;
+      yield this.plugin.saveSettings();
+    })));
+    setting.addText((text) => text.setPlaceholder("title (optional)").setValue(mapping.calloutTitle || "").onChange((value) => __async(this, null, function* () {
+      this.plugin.settings.colorMappings[index].calloutTitle = value;
       yield this.plugin.saveSettings();
     })));
     setting.addToggle((toggle) => toggle.setValue(mapping.enabled).onChange((value) => __async(this, null, function* () {
@@ -356,7 +376,8 @@ var ColorPicker = class extends import_obsidian3.Modal {
       });
       frag.appendText(`#${hexColor}`);
     }));
-    setting.setDesc(`\u2192 [!${mapping.calloutType}]`);
+    const calloutDisplay = mapping.calloutTitle ? `\u2192 [!${mapping.calloutType}] ${mapping.calloutTitle}` : `\u2192 [!${mapping.calloutType}]`;
+    setting.setDesc(calloutDisplay);
     setting.addToggle((toggle) => toggle.setValue(isSelected).onChange((value) => {
       if (value) {
         this.selectedColors.add(mapping.signedColor);
@@ -399,17 +420,18 @@ var ColorPicker = class extends import_obsidian3.Modal {
 
 // src/main.ts
 var DEFAULT_COLOR_MAPPINGS = [
-  { signedColor: -11184811, calloutType: "cite", enabled: true },
-  { signedColor: -2029999361, calloutType: "quote", enabled: true },
-  { signedColor: -2013331371, calloutType: "note", enabled: true },
-  { signedColor: -2013294080, calloutType: "warning", enabled: true },
-  { signedColor: -2013266176, calloutType: "important", enabled: true },
-  { signedColor: -1543340033, calloutType: "info", enabled: true },
-  { signedColor: -1525467669, calloutType: "tip", enabled: true }
+  { signedColor: -11184811, calloutType: "cite", calloutTitle: "", enabled: true },
+  { signedColor: -2029999361, calloutType: "quote", calloutTitle: "", enabled: true },
+  { signedColor: -2013331371, calloutType: "note", calloutTitle: "", enabled: true },
+  { signedColor: -2013294080, calloutType: "warning", calloutTitle: "", enabled: true },
+  { signedColor: -2013266176, calloutType: "important", calloutTitle: "", enabled: true },
+  { signedColor: -1543340033, calloutType: "info", calloutTitle: "", enabled: true },
+  { signedColor: -1525467669, calloutType: "tip", calloutTitle: "", enabled: true }
 ];
 var MOONREADER_DEFAULT_SETTINGS = {
   exportsPath: "Book Exports",
   enableSRSSupport: false,
+  includeFrontmatter: true,
   colorMappings: DEFAULT_COLOR_MAPPINGS
 };
 var MoonReader = class extends import_obsidian4.Plugin {
@@ -470,6 +492,7 @@ var MoonReader = class extends import_obsidian4.Plugin {
           this.settings.colorMappings.push({
             signedColor: color,
             calloutType: "note",
+            calloutTitle: "",
             enabled: true
           });
           mappingsChanged = true;
@@ -489,7 +512,7 @@ var MoonReader = class extends import_obsidian4.Plugin {
         mapping.enabled = selectedMappings.some((sm) => sm.signedColor === mapping.signedColor);
       }
       yield this.saveSettings();
-      const output = generateOutput(parsedOutput, mrexptChoice, selectedMappings, this.settings.enableSRSSupport);
+      const output = generateOutput(parsedOutput, mrexptChoice, selectedMappings, this.settings.enableSRSSupport, this.settings.includeFrontmatter);
       yield this.app.vault.append(currentTFile, output);
       new import_obsidian4.Notice(`Imported ${parsedOutput.filter((a) => selectedMappings.some((m) => m.signedColor === a.signedColor)).length} annotations (${selectedMappings.length} colors)`);
     });

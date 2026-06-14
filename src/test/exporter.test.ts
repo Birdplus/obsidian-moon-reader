@@ -9,17 +9,123 @@ import {Annotation, ColorMapping} from "../types";
 import {TFile} from "obsidian";
 
 const colorMappings: ColorMapping[] = [
-	{ signedColor: colorFilter, calloutType: "cite", enabled: true },
+	{ signedColor: colorFilter, calloutType: "cite", calloutTitle: "", enabled: true },
 ];
 
-test("exporter.generateOutput", () => {
+test("exporter.generateOutput with frontmatter", () => {
 	const list = Array.from(listOfAnnotations);
-	expect(generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, colorMappings, false)).toMatchSnapshot();
+	expect(generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, colorMappings, false, true)).toMatchSnapshot();
+});
+
+test("exporter.generateOutput without frontmatter", () => {
+	const list = Array.from(listOfAnnotations);
+	expect(generateOutput((list as Annotation[]), ((mrexptTFile as unknown) as TFile), colorMappings, false, false)).toMatchInlineSnapshot(`
+"> [!cite]
+> INTRODUCTION
+
+> [!cite]
+> 1 Everything You Need to Know
+> ***
+> ##
+
+> [!cite]
+> 2 Everything You Need to Do
+> 
+> ***
+> ##
+
+> [!cite]
+> 3 Everything You Need to Have
+> ***
+> ##
+
+> [!cite]
+> 4 A Few Things to Keep in Mind
+> ***
+> ##
+
+> [!cite]
+> 5 Writing Is the Only Thing That Matters
+> ***
+> ##
+
+> [!cite]
+> 6 Simplicity Is Paramount
+> ***
+> ##
+
+> [!cite]
+> 7 Nobody Ever Starts From Scratch
+> ***
+> ##
+
+> [!cite]
+> 8 Let the Work Carry You Forward
+> ***
+> ##
+
+> [!cite]
+> 9 Separate and Interlocking Tasks
+> ***
+> ##
+
+> [!cite]
+> 10 Read for Understanding
+> ***
+> ##
+
+> [!cite]
+> 11 Take Smart Notes
+> ***
+> ##
+
+> [!cite]
+> 12 Develop Ideas
+> ***
+> ##
+
+> [!cite]
+> 13 Share Your Insight
+> ***
+> ##
+
+> [!cite]
+> 14 Make It a Habit
+> ***
+> ##
+
+> [!cite]
+> 1.1 Good Solutions are Simple – and Unexpected
+> ***
+> ###
+
+> [!cite]
+> 1.2 The Slip-box
+> ***
+> ###
+
+> [!cite]
+> 1.3 The slip-box manual
+> ***
+> ###
+
+"
+`);
+});
+
+test("exporter generateOutput with callout title", () => {
+	const list = Array.from(listOfAnnotations);
+	const mappingsWithTitle: ColorMapping[] = [
+		{ signedColor: colorFilter, calloutType: "cite", calloutTitle: "Chapter", enabled: true },
+	];
+	const output = generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, mappingsWithTitle, false, false);
+	expect(output).toContain("[!cite] Chapter");
+	expect(output).not.toContain("---");
 });
 
 test("exporter new experimental output", () => {
 	const list = Array.from(listOfAnnotations);
-	expect(generateOutput((list as Annotation[]), ((mrexptTFile as unknown) as TFile), colorMappings, true)).toMatchInlineSnapshot(`
+	expect(generateOutput((list as Annotation[]), ((mrexptTFile as unknown) as TFile), colorMappings, true, true)).toMatchInlineSnapshot(`
 "---
 path: "Book Exports/Sönke Ahrens - How to Take Smart Notes_ One Simple Technique to Boost Writing,  Learning and Thinking-Sönke Ahrens (2022).mrexpt"
 title: "How to Take Smart Notes. One Simple Technique to Boost Writing,  Learning and Thinking"

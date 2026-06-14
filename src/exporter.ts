@@ -7,19 +7,27 @@ export function generateOutput(
     mrexptTFile: TFile,
     colorMappings: ColorMapping[],
     enableNewExporter: boolean,
+    includeFrontmatter: boolean,
 ): string {
     const sample = listOfAnnotations[0];
     if (!sample) return '';
 
-    // Build a lookup map: signedColor -> calloutType
-    const colorToCallout = new Map<number, string>();
+    // Build lookup maps
+    const colorToCallout = new Map<number, { type: string; title: string }>();
     for (const mapping of colorMappings) {
-        colorToCallout.set(mapping.signedColor, mapping.calloutType);
+        colorToCallout.set(mapping.signedColor, {
+            type: mapping.calloutType,
+            title: mapping.calloutTitle || '',
+        });
     }
 
     const selectedColors = new Set(colorMappings.map(m => m.signedColor));
 
-    let output = `---
+    let output = '';
+
+    // Optional frontmatter
+    if (includeFrontmatter) {
+        output += `---
 path: "${mrexptTFile.path}"
 title: "${sample.bookName}"
 author: 
@@ -30,6 +38,7 @@ tags:
 ---
 
 `;
+    }
 
     // Filter annotations to only selected colors
     const filteredAnnotations = listOfAnnotations.filter(
@@ -48,7 +57,7 @@ tags:
 function template(
     annotation: Annotation,
     enableNewExporter: boolean,
-    colorToCallout: Map<number, string>,
+    colorToCallout: Map<number, { type: string; title: string }>,
 ) {
     let {indexCount, highlightText: highlight, noteText: note, signedColor} = annotation;
 
@@ -68,14 +77,22 @@ ${highlight.split("\n").map(t=>`> ${t}`).join("\n")}
 ${note.split("\n").map(t=>`> ${t}`).join("\n")}
 `;
     } else {
-        // Look up the mapped callout type, fall back to hex color
-        const calloutType = colorToCallout.get(signedColor) || integerToRGBA(signedColor).slice(0, 6);
+        // Look up the mapped callout type + title, fall back to hex color
+        const mapped = colorToCallout.get(signedColor);
+        const calloutType = mapped?.type || integerToRGBA(signedColor).slice(0, 6);
+        const calloutTitle = mapped?.title || '';
         
         if (highlight.includes("\n")) {
             highlight = highlight.replaceAll("\n", "\n> ");
         }
         
-        let result = `> [!${calloutType}]\n`;
+        // Build callout header: [!type] or [!type] Title
+        let calloutHeader = `> [!${calloutType}]`;
+        if (calloutTitle) {
+            calloutHeader += ` ${calloutTitle}`;
+        }
+        
+        let result = `${calloutHeader}\n`;
         result += `> ${highlight}\n`;
         if (note && note.trim()) {
             result += `> ***\n`;

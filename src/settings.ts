@@ -30,6 +30,17 @@ export class SettingsTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
+            .setName('Include file header (frontmatter)')
+            .setDesc('Add YAML frontmatter (path, title, timestamp, tags) at the top of the output. ' +
+                     'Turn off if you have your own note structure.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.includeFrontmatter)
+                .onChange(async (value) => {
+                    this.plugin.settings.includeFrontmatter = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
             .setName('Experimental Support for SRS')
             .setDesc(createFragment((frag) => {
                 frag.appendText("Enable support for ");
@@ -59,8 +70,8 @@ export class SettingsTab extends PluginSettingTab {
         containerEl.createEl('h3', {text: 'Color → Callout Mapping'});
         containerEl.createEl('p', {
             text: 'Map each Moon+ Reader highlight color to an Obsidian callout type. ' +
-                  'Only enabled mappings will be imported. When you parse an export, ' +
-                  'you can also choose which to include.'
+                  'You can also set a custom title that appears after the callout type, ' +
+                  'e.g. [!quote] My Custom Title.'
         });
 
         // Color mapping table
@@ -83,6 +94,7 @@ export class SettingsTab extends PluginSettingTab {
                     this.plugin.settings.colorMappings.push({
                         signedColor: 0,
                         calloutType: 'note',
+                        calloutTitle: '',
                         enabled: true,
                     });
                     await this.plugin.saveSettings();
@@ -97,15 +109,14 @@ export class SettingsTab extends PluginSettingTab {
                 .setButtonText('Reset')
                 .setWarning()
                 .onClick(async () => {
-                    // Keep only the original default mappings
                     this.plugin.settings.colorMappings = [
-                        { signedColor: -11184811, calloutType: "cite", enabled: true },
-                        { signedColor: -2029999361, calloutType: "quote", enabled: true },
-                        { signedColor: -2013331371, calloutType: "note", enabled: true },
-                        { signedColor: -2013294080, calloutType: "warning", enabled: true },
-                        { signedColor: -2013266176, calloutType: "important", enabled: true },
-                        { signedColor: -1543340033, calloutType: "info", enabled: true },
-                        { signedColor: -1525467669, calloutType: "tip", enabled: true },
+                        { signedColor: -11184811, calloutType: "cite", calloutTitle: "", enabled: true },
+                        { signedColor: -2029999361, calloutType: "quote", calloutTitle: "", enabled: true },
+                        { signedColor: -2013331371, calloutType: "note", calloutTitle: "", enabled: true },
+                        { signedColor: -2013294080, calloutType: "warning", calloutTitle: "", enabled: true },
+                        { signedColor: -2013266176, calloutType: "important", calloutTitle: "", enabled: true },
+                        { signedColor: -1543340033, calloutType: "info", calloutTitle: "", enabled: true },
+                        { signedColor: -1525467669, calloutType: "tip", calloutTitle: "", enabled: true },
                     ];
                     await this.plugin.saveSettings();
                     this.display();
@@ -117,7 +128,7 @@ export class SettingsTab extends PluginSettingTab {
         
         const setting = new Setting(containerEl);
 
-        // Color preview box (via HTML fragment)
+        // Color preview + hex label as the setting name
         setting.setName(createFragment((frag) => {
             const colorBox = frag.createEl('span', {
                 attr: {
@@ -129,14 +140,21 @@ export class SettingsTab extends PluginSettingTab {
             frag.appendText(`#${hexColor}`);
         }));
 
-        setting.setDesc(`Moon+ Reader color code: ${mapping.signedColor}`);
-
         // Callout type input
         setting.addText(text => text
-            .setPlaceholder('callout type')
+            .setPlaceholder('type (e.g. note)')
             .setValue(mapping.calloutType)
             .onChange(async (value) => {
                 this.plugin.settings.colorMappings[index].calloutType = value;
+                await this.plugin.saveSettings();
+            }));
+
+        // Callout title input
+        setting.addText(text => text
+            .setPlaceholder('title (optional)')
+            .setValue(mapping.calloutTitle || '')
+            .onChange(async (value) => {
+                this.plugin.settings.colorMappings[index].calloutTitle = value;
                 await this.plugin.saveSettings();
             }));
 

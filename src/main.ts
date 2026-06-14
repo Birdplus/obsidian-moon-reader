@@ -10,24 +10,24 @@ import integerToRGBA from './util';
 export interface MoonReaderSettings {
     exportsPath: string;
     enableSRSSupport: boolean;
+    includeFrontmatter: boolean;
     colorMappings: ColorMapping[];
 }
 
 const DEFAULT_COLOR_MAPPINGS: ColorMapping[] = [
-    // Default Moon+ Reader highlight colors mapped to Obsidian callouts
-    // These will be populated from the first real import; starting with some sensible defaults
-    { signedColor: -11184811, calloutType: "cite", enabled: true },    // Grey bookmarks/chapters
-    { signedColor: -2029999361, calloutType: "quote", enabled: true }, // Blue-ish
-    { signedColor: -2013331371, calloutType: "note", enabled: true },  // Purple-ish
-    { signedColor: -2013294080, calloutType: "warning", enabled: true }, // Orange-ish
-    { signedColor: -2013266176, calloutType: "important", enabled: true }, // Another
-    { signedColor: -1543340033, calloutType: "info", enabled: true },  // Green-ish
-    { signedColor: -1525467669, calloutType: "tip", enabled: true },   // Pink-ish
+    { signedColor: -11184811, calloutType: "cite", calloutTitle: "", enabled: true },
+    { signedColor: -2029999361, calloutType: "quote", calloutTitle: "", enabled: true },
+    { signedColor: -2013331371, calloutType: "note", calloutTitle: "", enabled: true },
+    { signedColor: -2013294080, calloutType: "warning", calloutTitle: "", enabled: true },
+    { signedColor: -2013266176, calloutType: "important", calloutTitle: "", enabled: true },
+    { signedColor: -1543340033, calloutType: "info", calloutTitle: "", enabled: true },
+    { signedColor: -1525467669, calloutType: "tip", calloutTitle: "", enabled: true },
 ];
 
 const MOONREADER_DEFAULT_SETTINGS: MoonReaderSettings = {
     exportsPath: 'Book Exports',
     enableSRSSupport: false,
+    includeFrontmatter: true,
     colorMappings: DEFAULT_COLOR_MAPPINGS,
 }
 
@@ -68,7 +68,6 @@ export default class MoonReader extends Plugin {
                 )
                 .map(t => t as TFile);
         } else {
-            //sanity check
             new Notice("Invalid Folder Path");
             return;
         }
@@ -98,6 +97,7 @@ export default class MoonReader extends Plugin {
                 this.settings.colorMappings.push({
                     signedColor: color,
                     calloutType: "note",
+                    calloutTitle: "",
                     enabled: true,
                 });
                 mappingsChanged = true;
@@ -134,6 +134,7 @@ export default class MoonReader extends Plugin {
             mrexptChoice,
             selectedMappings,
             this.settings.enableSRSSupport,
+            this.settings.includeFrontmatter,
         );
 
         await this.app.vault.append(currentTFile, output);

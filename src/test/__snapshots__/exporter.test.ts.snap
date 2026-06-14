@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`exporter.generateOutput 1`] = `
+exports[`exporter.generateOutput with frontmatter 1`] = `
 "---
 path: "Book Exports/Sönke Ahrens - How to Take Smart Notes_ One Simple Technique to Boost Writing,  Learning and Thinking-Sönke Ahrens (2022).mrexpt"
 title: "How to Take Smart Notes. One Simple Technique to Boost Writing,  Learning and Thinking"

@@ -85,8 +85,11 @@ export class ColorPicker extends Modal {
             frag.appendText(`#${hexColor}`);
         }));
 
-        // Callout type and description
-        setting.setDesc(`→ [!${mapping.calloutType}]`);
+        // Callout type and title description
+        const calloutDisplay = mapping.calloutTitle
+            ? `→ [!${mapping.calloutType}] ${mapping.calloutTitle}`
+            : `→ [!${mapping.calloutType}]`;
+        setting.setDesc(calloutDisplay);
 
         // Toggle
         setting.addToggle(toggle => toggle

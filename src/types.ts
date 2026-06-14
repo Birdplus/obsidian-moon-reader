@@ -26,6 +26,8 @@ export interface ColorMapping {
     signedColor: number;
     /** The Obsidian callout type, e.g. "note", "quote", "warning" */
     calloutType: string;
+    /** Optional custom title displayed after the callout type, e.g. [!note] My Title */
+    calloutTitle?: string;
     /** Whether this mapping is enabled for import */
     enabled: boolean;
 }
