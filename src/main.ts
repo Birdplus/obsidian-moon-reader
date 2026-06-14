@@ -81,7 +81,7 @@ export default class MoonReader extends Plugin {
         if (!mrexptChoice) {
             return;
         }
-        const parsedOutput = await parse(mrexptChoice);
+        const parsedOutput = parse(await this.app.vault.read(mrexptChoice));
         if (!parsedOutput || parsedOutput.length === 0) {
             new Notice("Nothing added!");
             return;

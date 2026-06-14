@@ -59,6 +59,10 @@ export class ColorPicker extends Modal {
                 .setCta()
                 .onClick(() => {
                     this.submitted = true;
+                    const selected = this.mappings.filter(
+                        m => this.selectedColors.has(m.signedColor)
+                    );
+                    this.resolve(selected);
                     this.close();
                 }));
     }
