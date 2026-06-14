@@ -1,65 +1,133 @@
-import { App, FuzzyMatch, FuzzySuggestModal } from 'obsidian';
+import { App, Modal, Setting } from 'obsidian';
 import integerToRGBA from './util';
+import { ColorMapping } from './types';
 
-export class ColorPicker extends FuzzySuggestModal<number> {
-	suggestions: number[];
-	private resolve: (value: number) => void;
-	private reject: (reason?: string) => void;
-	submitted: boolean;
+/**
+ * Multi-select modal for choosing which colors/callouts to import.
+ * Shows each Moon+ Reader color with its mapped Obsidian callout type.
+ * Press Shift+Enter or click "Import Selected" to confirm.
+ */
+export class ColorPicker extends Modal {
+    private mappings: ColorMapping[];
+    private selectedColors: Set<number>;
+    private resolve: (value: ColorMapping[]) => void;
+    private reject: (reason?: string) => void;
+    private submitted: boolean;
 
-	constructor(app: App, suggestions: number[]) {
-		super(app);
-		this.setPlaceholder("Choose your color");
-		// TODO: better folder handling
-		this.suggestions = suggestions;
-		this.submitted = false;
-	}
+    constructor(app: App, mappings: ColorMapping[]) {
+        super(app);
+        this.mappings = mappings;
+        // Pre-select enabled mappings
+        this.selectedColors = new Set(
+            mappings.filter(m => m.enabled).map(m => m.signedColor)
+        );
+        this.submitted = false;
+    }
 
-	getItems(): number[] {
-		return this.suggestions;
-	}
+    onOpen(): void {
+        const { contentEl } = this;
+        contentEl.empty();
 
-	getItemText(item: number): string {
-		return `${integerToRGBA(item)}`;
-	}
+        contentEl.createEl('h2', { text: 'Select colors to import' });
 
-	onChooseItem(item: number ,_evt: MouseEvent | KeyboardEvent): void {
-		this.resolve(item);
-	}
+        contentEl.createEl('p', {
+            text: 'Choose which colors to import. Click the toggle to include/exclude each color.',
+            attr: { style: 'color: var(--text-muted); font-size: 0.9em; margin-bottom: 16px;' }
+        });
 
-	selectSuggestion(value: FuzzyMatch<number>, evt: MouseEvent | KeyboardEvent): void {
-		this.submitted = true;
-		this.onChooseSuggestion(value, evt);
-		this.close();
-	}
+        // Build a checkbox for each mapping
+        for (const mapping of this.mappings) {
+            this.addMappingRow(contentEl, mapping);
+        }
 
-	onClose(): void {
-		if (!this.submitted) {
-			this.reject();
-		}
-	}
+        // Bottom buttons
+        new Setting(contentEl)
+            .addButton(btn => btn
+                .setButtonText('Select All')
+                .onClick(() => {
+                    this.mappings.forEach(m => this.selectedColors.add(m.signedColor));
+                    this.refreshUI();
+                }))
+            .addButton(btn => btn
+                .setButtonText('Deselect All')
+                .onClick(() => {
+                    this.selectedColors.clear();
+                    this.refreshUI();
+                }))
+            .addButton(btn => btn
+                .setButtonText('Import Selected')
+                .setCta()
+                .onClick(() => {
+                    this.submitted = true;
+                    this.close();
+                }));
+    }
 
-	async openAndGetValue(
-	): Promise<number> {
-		return new Promise(
-			(resolve, reject) => {
-				try {
-					this.resolve = resolve;
-					this.reject = reject;
-					this.open();
-				}
-				catch (e) {
-					console.log(e)
-				}
-			}
-		)
-	}
-	
-	renderSuggestion(item: FuzzyMatch<number>, el: HTMLElement): void {
-		el.addClass("colorpicker");
-		const colorDiv = el.createDiv("color-box");
-		colorDiv.style.backgroundColor = `#${integerToRGBA(item.item).slice(0,6)}`;
-		const div = el.createDiv();
-		div.setText(`${integerToRGBA(item.item).slice(0,6)}`);
-	}
+    private addMappingRow(containerEl: HTMLElement, mapping: ColorMapping): void {
+        const hexColor = integerToRGBA(mapping.signedColor).slice(0, 6);
+        const isSelected = this.selectedColors.has(mapping.signedColor);
+
+        const setting = new Setting(containerEl);
+
+        // Color preview
+        setting.setName(createFragment((frag) => {
+            const colorBox = frag.createEl('span', {
+                attr: {
+                    style: `display: inline-block; width: 14px; height: 14px; border-radius: 3px; ` +
+                           `background-color: #${hexColor}; border: 1px solid var(--background-modifier-border); ` +
+                           `vertical-align: middle; margin-right: 8px;`
+                }
+            });
+            frag.appendText(`#${hexColor}`);
+        }));
+
+        // Callout type and description
+        setting.setDesc(`→ [!${mapping.calloutType}]`);
+
+        // Toggle
+        setting.addToggle(toggle => toggle
+            .setValue(isSelected)
+            .onChange((value) => {
+                if (value) {
+                    this.selectedColors.add(mapping.signedColor);
+                } else {
+                    this.selectedColors.delete(mapping.signedColor);
+                }
+            }));
+    }
+
+    private refreshUI(): void {
+        // Re-render the modal body
+        this.onOpen();
+    }
+
+    onClose(): void {
+        const { contentEl } = this;
+        contentEl.empty();
+
+        if (!this.submitted) {
+            // User pressed Escape — return selected items if any
+            const selected = this.mappings.filter(
+                m => this.selectedColors.has(m.signedColor)
+            );
+            if (selected.length > 0) {
+                this.resolve(selected);
+            } else {
+                this.reject?.("No colors selected");
+            }
+        }
+    }
+
+    async openAndGetValue(): Promise<ColorMapping[]> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.resolve = resolve;
+                this.reject = reject;
+                this.open();
+            } catch (e) {
+                console.log(e);
+                reject(String(e));
+            }
+        });
+    }
 }

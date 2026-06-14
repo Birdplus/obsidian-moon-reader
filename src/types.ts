@@ -17,3 +17,15 @@ export class Annotation {
     annotType2: number;
     annotType3: number;
 }
+
+/**
+ * Maps a Moon+ Reader signed color integer to an Obsidian callout type.
+ */
+export interface ColorMapping {
+    /** The signed 32-bit ARGB color from Moon+ Reader */
+    signedColor: number;
+    /** The Obsidian callout type, e.g. "note", "quote", "warning" */
+    calloutType: string;
+    /** Whether this mapping is enabled for import */
+    enabled: boolean;
+}

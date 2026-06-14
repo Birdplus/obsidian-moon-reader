@@ -5,23 +5,29 @@ import {
 	listOfAnnotations,
 	mrexptTFile
 } from "./json/howtotakenotes-success/exporter.generateOutput.input-2022-11-19 14-04-30.json";
-import {Annotation} from "../types";
+import {Annotation, ColorMapping} from "../types";
 import {TFile} from "obsidian";
+
+const colorMappings: ColorMapping[] = [
+	{ signedColor: colorFilter, calloutType: "cite", enabled: true },
+];
 
 test("exporter.generateOutput", () => {
 	const list = Array.from(listOfAnnotations);
-	expect(generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, colorFilter, false)).toMatchSnapshot();
+	expect(generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, colorMappings, false)).toMatchSnapshot();
 });
 
 test("exporter new experimental output", () => {
 	const list = Array.from(listOfAnnotations);
-	expect(generateOutput((list as Annotation[]), ((mrexptTFile as unknown) as TFile), colorFilter, true)).toMatchInlineSnapshot(`
+	expect(generateOutput((list as Annotation[]), ((mrexptTFile as unknown) as TFile), colorMappings, true)).toMatchInlineSnapshot(`
 "---
 path: "Book Exports/Sönke Ahrens - How to Take Smart Notes_ One Simple Technique to Boost Writing,  Learning and Thinking-Sönke Ahrens (2022).mrexpt"
 title: "How to Take Smart Notes. One Simple Technique to Boost Writing,  Learning and Thinking"
 author: 
 lastExportedTimestamp: 1665321164166
 lastExportedID: 12623
+tags: 
+  - "review/book"
 ---
 
 > [!notes] 12585
