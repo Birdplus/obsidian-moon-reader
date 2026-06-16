@@ -107,6 +107,30 @@ const strings: Record<string, Record<Lang, string>> = {
         en: 'Append the annotation date (e.g. [[2026-04-27]] 22:50) to the callout title.',
         zh: '在 Callout 标题后追加标注日期，如 [[2026-04-27]] 22:50。',
     },
+    'settings.notesFirst': {
+        en: 'Show personal notes first',
+        zh: '将个人笔记前置',
+    },
+    'settings.notesFirstDesc': {
+        en: 'Annotations with your own notes appear twice: first as a "Notes" section at the top, then again in the full list below. You can customize the section headings.',
+        zh: '有个人笔记的标注会出现两次：首先在顶部的"感想"区，然后在下面的"全摘录"区再次出现。两个区域的标题都可自定义。',
+    },
+    'settings.notesFirstHeading': {
+        en: 'Notes section heading',
+        zh: '感想区标题',
+    },
+    'settings.notesFirstHeadingDesc': {
+        en: 'Heading for the first section (annotations with notes).',
+        zh: '第一部分的标题，只包含有个人笔记的标注。',
+    },
+    'settings.fullListHeading': {
+        en: 'Full list heading',
+        zh: '全摘录区标题',
+    },
+    'settings.fullListHeadingDesc': {
+        en: 'Heading for the second section (all annotations).',
+        zh: '第二部分的标题，包含所有标注。',
+    },
 
     // --- Color picker modal ---
     'picker.title': {

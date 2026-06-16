@@ -156,7 +156,7 @@ function formatTimestamp(unixTimestamp) {
   const min = String(date.getMinutes()).padStart(2, "0");
   return `[[${y}-${m}-${d}]] ${h}:${min}`;
 }
-function generateOutput(listOfAnnotations, mrexptTFile, colorMappings, enableNewExporter, includeFrontmatter, showTimestampInCallout) {
+function generateOutput(listOfAnnotations, mrexptTFile, colorMappings, enableNewExporter, includeFrontmatter, showTimestampInCallout, showNotesFirst, notesFirstHeading, fullListHeading) {
   const sample = listOfAnnotations[0];
   if (!sample)
     return "";
@@ -183,6 +183,22 @@ tags:
 `;
   }
   const filteredAnnotations = listOfAnnotations.filter((a) => selectedColors.has(a.signedColor));
+  const annotatedNotes = filteredAnnotations.filter((a) => a.noteText && a.noteText.trim() && a.noteText.trim() !== "#" && a.noteText.trim() !== "##" && a.noteText.trim() !== "###");
+  if (showNotesFirst && annotatedNotes.length > 0) {
+    output += `## ${notesFirstHeading}
+
+`;
+    for (const annotation of annotatedNotes) {
+      if (annotation.highlightText || annotation.noteText) {
+        output += `${template(annotation, enableNewExporter, colorToCallout, showTimestampInCallout)}
+`;
+      }
+    }
+    output += `
+## ${fullListHeading}
+
+`;
+  }
   for (const annotation of filteredAnnotations) {
     if (annotation.highlightText || annotation.noteText) {
       output += `${template(annotation, enableNewExporter, colorToCallout, showTimestampInCallout)}
@@ -351,6 +367,30 @@ var strings = {
     en: "Append the annotation date (e.g. [[2026-04-27]] 22:50) to the callout title.",
     zh: "\u5728 Callout \u6807\u9898\u540E\u8FFD\u52A0\u6807\u6CE8\u65E5\u671F\uFF0C\u5982 [[2026-04-27]] 22:50\u3002"
   },
+  "settings.notesFirst": {
+    en: "Show personal notes first",
+    zh: "\u5C06\u4E2A\u4EBA\u7B14\u8BB0\u524D\u7F6E"
+  },
+  "settings.notesFirstDesc": {
+    en: 'Annotations with your own notes appear twice: first as a "Notes" section at the top, then again in the full list below. You can customize the section headings.',
+    zh: '\u6709\u4E2A\u4EBA\u7B14\u8BB0\u7684\u6807\u6CE8\u4F1A\u51FA\u73B0\u4E24\u6B21\uFF1A\u9996\u5148\u5728\u9876\u90E8\u7684"\u611F\u60F3"\u533A\uFF0C\u7136\u540E\u5728\u4E0B\u9762\u7684"\u5168\u6458\u5F55"\u533A\u518D\u6B21\u51FA\u73B0\u3002\u4E24\u4E2A\u533A\u57DF\u7684\u6807\u9898\u90FD\u53EF\u81EA\u5B9A\u4E49\u3002'
+  },
+  "settings.notesFirstHeading": {
+    en: "Notes section heading",
+    zh: "\u611F\u60F3\u533A\u6807\u9898"
+  },
+  "settings.notesFirstHeadingDesc": {
+    en: "Heading for the first section (annotations with notes).",
+    zh: "\u7B2C\u4E00\u90E8\u5206\u7684\u6807\u9898\uFF0C\u53EA\u5305\u542B\u6709\u4E2A\u4EBA\u7B14\u8BB0\u7684\u6807\u6CE8\u3002"
+  },
+  "settings.fullListHeading": {
+    en: "Full list heading",
+    zh: "\u5168\u6458\u5F55\u533A\u6807\u9898"
+  },
+  "settings.fullListHeadingDesc": {
+    en: "Heading for the second section (all annotations).",
+    zh: "\u7B2C\u4E8C\u90E8\u5206\u7684\u6807\u9898\uFF0C\u5305\u542B\u6240\u6709\u6807\u6CE8\u3002"
+  },
   "picker.title": {
     en: "Select colors to import",
     zh: "\u9009\u62E9\u8981\u5BFC\u5165\u7684\u989C\u8272"
@@ -432,6 +472,19 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
     })));
     new import_obsidian2.Setting(containerEl).setName(this.tr("settings.timestamp")).setDesc(this.tr("settings.timestampDesc")).addToggle((toggle) => toggle.setValue(this.plugin.settings.showTimestampInCallout).onChange((value) => __async(this, null, function* () {
       this.plugin.settings.showTimestampInCallout = value;
+      yield this.plugin.saveSettings();
+    })));
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.notesFirst")).setDesc(this.tr("settings.notesFirstDesc")).addToggle((toggle) => toggle.setValue(this.plugin.settings.showNotesFirst).onChange((value) => __async(this, null, function* () {
+      this.plugin.settings.showNotesFirst = value;
+      yield this.plugin.saveSettings();
+      this.display();
+    })));
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.notesFirstHeading")).setDesc(this.tr("settings.notesFirstHeadingDesc")).addText((text) => text.setPlaceholder("\u611F\u60F3").setValue(this.plugin.settings.notesFirstHeading).onChange((value) => __async(this, null, function* () {
+      this.plugin.settings.notesFirstHeading = value;
+      yield this.plugin.saveSettings();
+    })));
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.fullListHeading")).setDesc(this.tr("settings.fullListHeadingDesc")).addText((text) => text.setPlaceholder("\u5168\u6458\u5F55").setValue(this.plugin.settings.fullListHeading).onChange((value) => __async(this, null, function* () {
+      this.plugin.settings.fullListHeading = value;
       yield this.plugin.saveSettings();
     })));
     new import_obsidian2.Setting(containerEl).setName(this.tr("settings.srs")).setDesc(this.tr("settings.srsDesc")).addToggle((toggle) => toggle.setValue(this.plugin.settings.enableSRSSupport).onChange((value) => __async(this, null, function* () {
@@ -617,6 +670,9 @@ var MOONREADER_DEFAULT_SETTINGS = {
   enableSRSSupport: false,
   includeFrontmatter: true,
   showTimestampInCallout: true,
+  showNotesFirst: true,
+  notesFirstHeading: "\u611F\u60F3",
+  fullListHeading: "\u5168\u6458\u5F55",
   language: "zh",
   colorMappings: DEFAULT_COLOR_MAPPINGS
 };
@@ -701,7 +757,7 @@ var MoonReader = class extends import_obsidian4.Plugin {
         mapping.enabled = selectedMappings.some((sm) => sm.signedColor === mapping.signedColor);
       }
       yield this.saveSettings();
-      const output = generateOutput(parsedOutput, mrexptChoice, selectedMappings, this.settings.enableSRSSupport, this.settings.includeFrontmatter, this.settings.showTimestampInCallout);
+      const output = generateOutput(parsedOutput, mrexptChoice, selectedMappings, this.settings.enableSRSSupport, this.settings.includeFrontmatter, this.settings.showTimestampInCallout, this.settings.showNotesFirst, this.settings.notesFirstHeading, this.settings.fullListHeading);
       yield this.app.vault.append(currentTFile, output);
       new import_obsidian4.Notice(`Imported ${parsedOutput.filter((a) => selectedMappings.some((m) => m.signedColor === a.signedColor)).length} annotations (${selectedMappings.length} colors)`);
     });

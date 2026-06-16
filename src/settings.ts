@@ -68,6 +68,39 @@ export class SettingsTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
+            .setName(this.tr('settings.notesFirst'))
+            .setDesc(this.tr('settings.notesFirstDesc'))
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.showNotesFirst)
+                .onChange(async (value) => {
+                    this.plugin.settings.showNotesFirst = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        new Setting(containerEl)
+            .setName(this.tr('settings.notesFirstHeading'))
+            .setDesc(this.tr('settings.notesFirstHeadingDesc'))
+            .addText(text => text
+                .setPlaceholder('感想')
+                .setValue(this.plugin.settings.notesFirstHeading)
+                .onChange(async (value) => {
+                    this.plugin.settings.notesFirstHeading = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(this.tr('settings.fullListHeading'))
+            .setDesc(this.tr('settings.fullListHeadingDesc'))
+            .addText(text => text
+                .setPlaceholder('全摘录')
+                .setValue(this.plugin.settings.fullListHeading)
+                .onChange(async (value) => {
+                    this.plugin.settings.fullListHeading = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
             .setName(this.tr('settings.srs'))
             .setDesc(this.tr('settings.srsDesc'))
             .addToggle(toggle =>

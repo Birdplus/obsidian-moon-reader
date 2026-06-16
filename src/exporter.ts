@@ -25,6 +25,9 @@ export function generateOutput(
     enableNewExporter: boolean,
     includeFrontmatter: boolean,
     showTimestampInCallout: boolean,
+    showNotesFirst: boolean,
+    notesFirstHeading: string,
+    fullListHeading: string,
 ): string {
     const sample = listOfAnnotations[0];
     if (!sample) return '';
@@ -57,11 +60,27 @@ tags:
 `;
     }
 
-    // Filter annotations to only selected colors
+    // Filter annotations to selected colors
     const filteredAnnotations = listOfAnnotations.filter(
         a => selectedColors.has(a.signedColor)
     );
 
+    // Annotations that have personal notes
+    const annotatedNotes = filteredAnnotations.filter(
+        a => a.noteText && a.noteText.trim() && a.noteText.trim() !== '#' && a.noteText.trim() !== '##' && a.noteText.trim() !== '###'
+    );
+
+    if (showNotesFirst && annotatedNotes.length > 0) {
+        output += `## ${notesFirstHeading}\n\n`;
+        for (const annotation of annotatedNotes) {
+            if (annotation.highlightText || annotation.noteText) {
+                output += `${template(annotation, enableNewExporter, colorToCallout, showTimestampInCallout)}\n`;
+            }
+        }
+        output += `\n## ${fullListHeading}\n\n`;
+    }
+
+    // Full list — all annotations
     for (const annotation of filteredAnnotations) {
         if (annotation.highlightText || annotation.noteText) {
             output += `${template(annotation, enableNewExporter, colorToCallout, showTimestampInCallout)}\n`;

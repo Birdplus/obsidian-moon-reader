@@ -13,6 +13,9 @@ export interface MoonReaderSettings {
     enableSRSSupport: boolean;
     includeFrontmatter: boolean;
     showTimestampInCallout: boolean;
+    showNotesFirst: boolean;
+    notesFirstHeading: string;
+    fullListHeading: string;
     language: Lang;
     colorMappings: ColorMapping[];
 }
@@ -32,6 +35,9 @@ const MOONREADER_DEFAULT_SETTINGS: MoonReaderSettings = {
     enableSRSSupport: false,
     includeFrontmatter: true,
     showTimestampInCallout: true,
+    showNotesFirst: true,
+    notesFirstHeading: '感想',
+    fullListHeading: '全摘录',
     language: 'zh',
     colorMappings: DEFAULT_COLOR_MAPPINGS,
 }
@@ -147,6 +153,9 @@ export default class MoonReader extends Plugin {
             this.settings.enableSRSSupport,
             this.settings.includeFrontmatter,
             this.settings.showTimestampInCallout,
+            this.settings.showNotesFirst,
+            this.settings.notesFirstHeading,
+            this.settings.fullListHeading,
         );
 
         await this.app.vault.append(currentTFile, output);
