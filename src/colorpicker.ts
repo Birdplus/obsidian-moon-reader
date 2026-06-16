@@ -1,11 +1,11 @@
 import { App, Modal, Setting } from 'obsidian';
 import integerToRGBA from './util';
 import { ColorMapping } from './types';
+import { t, Lang } from './strings';
 
 /**
  * Multi-select modal for choosing which colors/callouts to import.
  * Shows each Moon+ Reader color with its mapped Obsidian callout type.
- * Press Shift+Enter or click "Import Selected" to confirm.
  */
 export class ColorPicker extends Modal {
     private mappings: ColorMapping[];
@@ -13,11 +13,12 @@ export class ColorPicker extends Modal {
     private resolve: (value: ColorMapping[]) => void;
     private reject: (reason?: string) => void;
     private submitted: boolean;
+    private lang: Lang;
 
-    constructor(app: App, mappings: ColorMapping[]) {
+    constructor(app: App, mappings: ColorMapping[], lang: Lang = 'en') {
         super(app);
         this.mappings = mappings;
-        // Pre-select enabled mappings
+        this.lang = lang;
         this.selectedColors = new Set(
             mappings.filter(m => m.enabled).map(m => m.signedColor)
         );
@@ -28,10 +29,10 @@ export class ColorPicker extends Modal {
         const { contentEl } = this;
         contentEl.empty();
 
-        contentEl.createEl('h2', { text: 'Select colors to import' });
+        contentEl.createEl('h2', { text: t(this.lang, 'picker.title') });
 
         contentEl.createEl('p', {
-            text: 'Choose which colors to import. Click the toggle to include/exclude each color.',
+            text: t(this.lang, 'picker.desc'),
             attr: { style: 'color: var(--text-muted); font-size: 0.9em; margin-bottom: 16px;' }
         });
 
@@ -43,19 +44,19 @@ export class ColorPicker extends Modal {
         // Bottom buttons
         new Setting(contentEl)
             .addButton(btn => btn
-                .setButtonText('Select All')
+                .setButtonText(t(this.lang, 'picker.selectAll'))
                 .onClick(() => {
                     this.mappings.forEach(m => this.selectedColors.add(m.signedColor));
                     this.refreshUI();
                 }))
             .addButton(btn => btn
-                .setButtonText('Deselect All')
+                .setButtonText(t(this.lang, 'picker.deselectAll'))
                 .onClick(() => {
                     this.selectedColors.clear();
                     this.refreshUI();
                 }))
             .addButton(btn => btn
-                .setButtonText('Import Selected')
+                .setButtonText(t(this.lang, 'picker.importSelected'))
                 .setCta()
                 .onClick(() => {
                     this.submitted = true;
@@ -104,7 +105,6 @@ export class ColorPicker extends Modal {
     }
 
     private refreshUI(): void {
-        // Re-render the modal body
         this.onOpen();
     }
 
@@ -113,7 +113,6 @@ export class ColorPicker extends Modal {
         contentEl.empty();
 
         if (!this.submitted) {
-            // User pressed Escape — return selected items if any
             const selected = this.mappings.filter(
                 m => this.selectedColors.has(m.signedColor)
             );

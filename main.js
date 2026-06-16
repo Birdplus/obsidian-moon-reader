@@ -195,9 +195,9 @@ function template(annotation, enableNewExporter, colorToCallout) {
 `;
     }
     return `> [!notes] ${indexCount}
-${highlight.split("\n").map((t) => `> ${t}`).join("\n")}
+${highlight.split("\n").map((t2) => `> ${t2}`).join("\n")}
 > ***
-${note.split("\n").map((t) => `> ${t}`).join("\n")}
+${note.split("\n").map((t2) => `> ${t2}`).join("\n")}
 `;
   } else {
     const mapped = colorToCallout.get(signedColor);
@@ -229,48 +229,199 @@ ${note.split("\n").map((t) => `> ${t}`).join("\n")}
 
 // src/settings.ts
 var import_obsidian2 = __toModule(require("obsidian"));
+
+// src/strings.ts
+var strings = {
+  "settings.exportsPath": {
+    en: "Book Exports Path",
+    zh: "\u5BFC\u51FA\u6587\u4EF6\u5939\u8DEF\u5F84"
+  },
+  "settings.exportsPathDesc": {
+    en: "This is where your .mrexpt files are stored.",
+    zh: "\u5B58\u653E .mrexpt \u5BFC\u51FA\u6587\u4EF6\u7684\u6587\u4EF6\u5939\u8DEF\u5F84"
+  },
+  "settings.frontmatter": {
+    en: "Include file header (frontmatter)",
+    zh: "\u5305\u542B\u6587\u4EF6\u8868\u5934\uFF08frontmatter\uFF09"
+  },
+  "settings.frontmatterDesc": {
+    en: "Add YAML frontmatter (path, title, timestamp, tags) at the top of the output. Turn off if you have your own note structure.",
+    zh: "\u5728\u8F93\u51FA\u9876\u90E8\u6DFB\u52A0 YAML \u8868\u5934\uFF08\u8DEF\u5F84\u3001\u4E66\u540D\u3001\u65F6\u95F4\u6233\u3001\u6807\u7B7E\uFF09\u3002\u5982\u679C\u4F60\u6709\u81EA\u5DF1\u7684\u7B14\u8BB0\u7ED3\u6784\u53EF\u4EE5\u5173\u95ED\u3002"
+  },
+  "settings.srs": {
+    en: "SRS Support",
+    zh: "SRS \u652F\u6301"
+  },
+  "settings.srsDesc": {
+    en: "Enable support for the Obsidian Spaced Repetition plugin. This changes the output format.",
+    zh: "\u542F\u7528 Obsidian Spaced Repetition \u63D2\u4EF6\u517C\u5BB9\u652F\u6301\u3002\u4F1A\u6539\u53D8\u8F93\u51FA\u683C\u5F0F\u3002"
+  },
+  "settings.language": {
+    en: "Language / \u8BED\u8A00",
+    zh: "Language / \u8BED\u8A00"
+  },
+  "settings.languageDesc": {
+    en: "Switch the plugin UI between English and Chinese.",
+    zh: "\u5207\u6362\u63D2\u4EF6\u754C\u9762\u7684\u8BED\u8A00\uFF08\u4E2D\u6587 / English\uFF09"
+  },
+  "settings.colorMapping": {
+    en: "Color \u2192 Callout Mapping",
+    zh: "\u989C\u8272 \u2192 Callout \u6620\u5C04"
+  },
+  "settings.colorMappingDesc": {
+    en: "Map each Moon+ Reader highlight color to an Obsidian callout type. You can also set a custom title, e.g. [!quote] My Title.",
+    zh: "\u5C06\u6BCF\u79CD Moon+ Reader \u9AD8\u4EAE\u989C\u8272\u6620\u5C04\u4E3A Obsidian callout \u7C7B\u578B\u3002\u53EF\u4EE5\u8BBE\u7F6E\u81EA\u5B9A\u4E49\u6807\u9898\uFF0C\u5982 [!quote] \u6211\u7684\u6807\u9898\u3002"
+  },
+  "settings.noMappings": {
+    en: "No color mappings configured. Parse an export first to auto-discover colors.",
+    zh: "\u8FD8\u672A\u914D\u7F6E\u989C\u8272\u6620\u5C04\u3002\u5148\u5BFC\u5165\u4E00\u6B21\u5BFC\u51FA\u6587\u4EF6\uFF0C\u989C\u8272\u4F1A\u81EA\u52A8\u53D1\u73B0\u3002"
+  },
+  "settings.addMapping": {
+    en: "Add color mapping",
+    zh: "\u6DFB\u52A0\u989C\u8272\u6620\u5C04"
+  },
+  "settings.addMappingDesc": {
+    en: "Manually add a color-to-callout mapping",
+    zh: "\u624B\u52A8\u6DFB\u52A0\u989C\u8272\u6620\u5C04"
+  },
+  "settings.addBtn": {
+    en: "+ Add",
+    zh: "+ \u6DFB\u52A0"
+  },
+  "settings.reset": {
+    en: "Reset to defaults",
+    zh: "\u91CD\u7F6E\u4E3A\u9ED8\u8BA4\u503C"
+  },
+  "settings.resetDesc": {
+    en: "Remove all custom mappings and restore defaults",
+    zh: "\u5220\u9664\u6240\u6709\u81EA\u5B9A\u4E49\u6620\u5C04\u5E76\u6062\u590D\u9ED8\u8BA4\u503C"
+  },
+  "settings.resetBtn": {
+    en: "Reset",
+    zh: "\u91CD\u7F6E"
+  },
+  "settings.calloutTypePlaceholder": {
+    en: "type (e.g. note)",
+    zh: "\u7C7B\u578B\uFF08\u5982 note\uFF09"
+  },
+  "settings.calloutTitlePlaceholder": {
+    en: "title (optional)",
+    zh: "\u6807\u9898\uFF08\u53EF\u9009\uFF09"
+  },
+  "settings.colorCodeDesc": {
+    en: "Moon+ Reader color code:",
+    zh: "Moon+ Reader \u989C\u8272\u4EE3\u7801\uFF1A"
+  },
+  "settings.removeTooltip": {
+    en: "Remove this mapping",
+    zh: "\u5220\u9664\u6B64\u6620\u5C04"
+  },
+  "settings.srsText": {
+    en: "the Obsidian Spaced Repetition plugin",
+    zh: "Obsidian Spaced Repetition \u63D2\u4EF6"
+  },
+  "settings.srsDescSuffix": {
+    en: ". This will change the output format.",
+    zh: "\u3002\u5F00\u542F\u540E\u4F1A\u6539\u53D8\u8F93\u51FA\u683C\u5F0F\u3002"
+  },
+  "picker.title": {
+    en: "Select colors to import",
+    zh: "\u9009\u62E9\u8981\u5BFC\u5165\u7684\u989C\u8272"
+  },
+  "picker.desc": {
+    en: "Choose which colors to import. Click the toggle to include/exclude each color.",
+    zh: "\u9009\u62E9\u8981\u5BFC\u5165\u7684\u989C\u8272\u3002\u70B9\u51FB\u5F00\u5173\u9009\u62E9\u6216\u6392\u9664\u3002"
+  },
+  "picker.selectAll": {
+    en: "Select All",
+    zh: "\u5168\u9009"
+  },
+  "picker.deselectAll": {
+    en: "Deselect All",
+    zh: "\u5168\u4E0D\u9009"
+  },
+  "picker.importSelected": {
+    en: "Import Selected",
+    zh: "\u5BFC\u5165\u6240\u9009"
+  },
+  "notice.noActiveFile": {
+    en: "No active file!",
+    zh: "\u6CA1\u6709\u6253\u5F00\u7684\u7B14\u8BB0\uFF01"
+  },
+  "notice.invalidPath": {
+    en: "Invalid Folder Path",
+    zh: "\u6587\u4EF6\u5939\u8DEF\u5F84\u65E0\u6548"
+  },
+  "notice.noExports": {
+    en: "Folder does not have any Moon+ Reader exports!",
+    zh: "\u6587\u4EF6\u5939\u4E2D\u6CA1\u6709 Moon+ Reader \u5BFC\u51FA\u6587\u4EF6\uFF01"
+  },
+  "notice.promptCancelled": {
+    en: "Prompt cancelled",
+    zh: "\u5DF2\u53D6\u6D88"
+  },
+  "notice.nothingAdded": {
+    en: "Nothing added!",
+    zh: "\u6CA1\u6709\u6DFB\u52A0\u4EFB\u4F55\u5185\u5BB9\uFF01"
+  },
+  "notice.noColors": {
+    en: "No colors selected!",
+    zh: "\u6CA1\u6709\u9009\u62E9\u989C\u8272\uFF01"
+  }
+};
+function t(lang, key, ...args) {
+  const entry = strings[key];
+  let text = entry ? entry[lang] || entry["en"] || key : key;
+  for (let i = 0; i < args.length; i++) {
+    text = text.replace(new RegExp(`\\{${i}\\}`, "g"), String(args[i]));
+  }
+  return text;
+}
+
+// src/settings.ts
 var SettingsTab = class extends import_obsidian2.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
+  tr(key, ...args) {
+    return t(this.plugin.settings.language || "en", key, ...args);
+  }
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    new import_obsidian2.Setting(containerEl).setName("Book Exports Path").setDesc("This is where your .mrexpt files are stored.").addText((text) => text.setPlaceholder("Book Exports").setValue(this.plugin.settings.exportsPath).onChange((value) => __async(this, null, function* () {
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.language")).setDesc(this.tr("settings.languageDesc")).addDropdown((dropdown) => dropdown.addOption("en", "English").addOption("zh", "\u4E2D\u6587").setValue(this.plugin.settings.language).onChange((value) => __async(this, null, function* () {
+      this.plugin.settings.language = value;
+      yield this.plugin.saveSettings();
+      this.display();
+    })));
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.exportsPath")).setDesc(this.tr("settings.exportsPathDesc")).addText((text) => text.setPlaceholder("Book Exports").setValue(this.plugin.settings.exportsPath).onChange((value) => __async(this, null, function* () {
       this.plugin.settings.exportsPath = value;
       yield this.plugin.saveSettings();
     })));
-    new import_obsidian2.Setting(containerEl).setName("Include file header (frontmatter)").setDesc("Add YAML frontmatter (path, title, timestamp, tags) at the top of the output. Turn off if you have your own note structure.").addToggle((toggle) => toggle.setValue(this.plugin.settings.includeFrontmatter).onChange((value) => __async(this, null, function* () {
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.frontmatter")).setDesc(this.tr("settings.frontmatterDesc")).addToggle((toggle) => toggle.setValue(this.plugin.settings.includeFrontmatter).onChange((value) => __async(this, null, function* () {
       this.plugin.settings.includeFrontmatter = value;
       yield this.plugin.saveSettings();
     })));
-    new import_obsidian2.Setting(containerEl).setName("Experimental Support for SRS").setDesc(createFragment((frag) => {
-      frag.appendText("Enable support for ");
-      frag.createEl("a", {
-        text: "the Obsidian Spaced Repetition plugin",
-        href: "https://github.com/AB1908/obsidian-spaced-repetition/"
-      }, (a) => {
-        a.setAttr("target", "_blank");
-      });
-      frag.appendText(". This will change the output format.");
-    })).addToggle((toggle) => toggle.setValue(this.plugin.settings.enableSRSSupport).onChange((value) => __async(this, null, function* () {
-      return yield this.updateSettings({ enableSRSSupport: value });
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.srs")).setDesc(this.tr("settings.srsDesc")).addToggle((toggle) => toggle.setValue(this.plugin.settings.enableSRSSupport).onChange((value) => __async(this, null, function* () {
+      this.plugin.settings.enableSRSSupport = value;
+      yield this.plugin.saveSettings();
     })));
     containerEl.createEl("hr");
-    containerEl.createEl("h3", { text: "Color \u2192 Callout Mapping" });
+    containerEl.createEl("h3", { text: this.tr("settings.colorMapping") });
     containerEl.createEl("p", {
-      text: "Map each Moon+ Reader highlight color to an Obsidian callout type. You can also set a custom title that appears after the callout type, e.g. [!quote] My Custom Title."
+      text: this.tr("settings.colorMappingDesc"),
+      attr: { style: "color: var(--text-muted);" }
     });
     const mappings = this.plugin.settings.colorMappings;
     if (mappings.length === 0) {
-      containerEl.createEl("p", { text: "No color mappings configured. Parse an export first to auto-discover colors." });
+      containerEl.createEl("p", { text: this.tr("settings.noMappings") });
     } else {
       mappings.forEach((mapping, index) => {
         this.addColorMappingSetting(containerEl, mapping, index);
       });
     }
-    new import_obsidian2.Setting(containerEl).setName("Add color mapping").setDesc("Manually add a color-to-callout mapping").addButton((btn) => btn.setButtonText("+ Add").onClick(() => __async(this, null, function* () {
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.addMapping")).setDesc(this.tr("settings.addMappingDesc")).addButton((btn) => btn.setButtonText(this.tr("settings.addBtn")).onClick(() => __async(this, null, function* () {
       this.plugin.settings.colorMappings.push({
         signedColor: 0,
         calloutType: "note",
@@ -280,7 +431,7 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
       yield this.plugin.saveSettings();
       this.display();
     })));
-    new import_obsidian2.Setting(containerEl).setName("Reset to defaults").setDesc("Remove all custom mappings and restore defaults").addButton((btn) => btn.setButtonText("Reset").setWarning().onClick(() => __async(this, null, function* () {
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.reset")).setDesc(this.tr("settings.resetDesc")).addButton((btn) => btn.setButtonText(this.tr("settings.resetBtn")).setWarning().onClick(() => __async(this, null, function* () {
       this.plugin.settings.colorMappings = [
         { signedColor: -11184811, calloutType: "cite", calloutTitle: "", enabled: true },
         { signedColor: -2029999361, calloutType: "quote", calloutTitle: "", enabled: true },
@@ -305,11 +456,12 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
       });
       frag.appendText(`#${hexColor}`);
     }));
-    setting.addText((text) => text.setPlaceholder("type (e.g. note)").setValue(mapping.calloutType).onChange((value) => __async(this, null, function* () {
+    setting.setDesc(`${this.tr("settings.colorCodeDesc")} ${mapping.signedColor}`);
+    setting.addText((text) => text.setPlaceholder(this.tr("settings.calloutTypePlaceholder")).setValue(mapping.calloutType).onChange((value) => __async(this, null, function* () {
       this.plugin.settings.colorMappings[index].calloutType = value;
       yield this.plugin.saveSettings();
     })));
-    setting.addText((text) => text.setPlaceholder("title (optional)").setValue(mapping.calloutTitle || "").onChange((value) => __async(this, null, function* () {
+    setting.addText((text) => text.setPlaceholder(this.tr("settings.calloutTitlePlaceholder")).setValue(mapping.calloutTitle || "").onChange((value) => __async(this, null, function* () {
       this.plugin.settings.colorMappings[index].calloutTitle = value;
       yield this.plugin.saveSettings();
     })));
@@ -317,7 +469,7 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
       this.plugin.settings.colorMappings[index].enabled = value;
       yield this.plugin.saveSettings();
     })));
-    setting.addExtraButton((btn) => btn.setIcon("trash").setTooltip("Remove this mapping").onClick(() => __async(this, null, function* () {
+    setting.addExtraButton((btn) => btn.setIcon("trash").setTooltip(this.tr("settings.removeTooltip")).onClick(() => __async(this, null, function* () {
       this.plugin.settings.colorMappings.splice(index, 1);
       yield this.plugin.saveSettings();
       this.display();
@@ -334,30 +486,31 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
 // src/colorpicker.ts
 var import_obsidian3 = __toModule(require("obsidian"));
 var ColorPicker = class extends import_obsidian3.Modal {
-  constructor(app, mappings) {
+  constructor(app, mappings, lang = "en") {
     super(app);
     this.mappings = mappings;
+    this.lang = lang;
     this.selectedColors = new Set(mappings.filter((m) => m.enabled).map((m) => m.signedColor));
     this.submitted = false;
   }
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h2", { text: "Select colors to import" });
+    contentEl.createEl("h2", { text: t(this.lang, "picker.title") });
     contentEl.createEl("p", {
-      text: "Choose which colors to import. Click the toggle to include/exclude each color.",
+      text: t(this.lang, "picker.desc"),
       attr: { style: "color: var(--text-muted); font-size: 0.9em; margin-bottom: 16px;" }
     });
     for (const mapping of this.mappings) {
       this.addMappingRow(contentEl, mapping);
     }
-    new import_obsidian3.Setting(contentEl).addButton((btn) => btn.setButtonText("Select All").onClick(() => {
+    new import_obsidian3.Setting(contentEl).addButton((btn) => btn.setButtonText(t(this.lang, "picker.selectAll")).onClick(() => {
       this.mappings.forEach((m) => this.selectedColors.add(m.signedColor));
       this.refreshUI();
-    })).addButton((btn) => btn.setButtonText("Deselect All").onClick(() => {
+    })).addButton((btn) => btn.setButtonText(t(this.lang, "picker.deselectAll")).onClick(() => {
       this.selectedColors.clear();
       this.refreshUI();
-    })).addButton((btn) => btn.setButtonText("Import Selected").setCta().onClick(() => {
+    })).addButton((btn) => btn.setButtonText(t(this.lang, "picker.importSelected")).setCta().onClick(() => {
       this.submitted = true;
       const selected = this.mappings.filter((m) => this.selectedColors.has(m.signedColor));
       this.resolve(selected);
@@ -432,6 +585,7 @@ var MOONREADER_DEFAULT_SETTINGS = {
   exportsPath: "Book Exports",
   enableSRSSupport: false,
   includeFrontmatter: true,
+  language: "zh",
   colorMappings: DEFAULT_COLOR_MAPPINGS
 };
 var MoonReader = class extends import_obsidian4.Plugin {
@@ -451,41 +605,44 @@ var MoonReader = class extends import_obsidian4.Plugin {
       this.addSettingTab(new SettingsTab(this.app, this));
     });
   }
+  tr(key, ...args) {
+    return t(this.settings.language, key, ...args);
+  }
   start() {
     return __async(this, null, function* () {
       var _a;
       const currentTFile = this.app.workspace.getActiveFile();
       if (!currentTFile) {
-        new import_obsidian4.Notice("No active file!");
+        new import_obsidian4.Notice(this.tr("notice.noActiveFile"));
         return;
       }
       const rootPath = this.settings.exportsPath;
       const exportTFolder = this.app.vault.getAbstractFileByPath(rootPath);
       let exportedFiles;
       if (exportTFolder instanceof import_obsidian4.TFolder) {
-        exportedFiles = (_a = exportTFolder.children) == null ? void 0 : _a.filter((t) => t instanceof import_obsidian4.TFile && t.basename && t.extension == `mrexpt`).map((t) => t);
+        exportedFiles = (_a = exportTFolder.children) == null ? void 0 : _a.filter((t2) => t2 instanceof import_obsidian4.TFile && t2.basename && t2.extension == `mrexpt`).map((t2) => t2);
       } else {
-        new import_obsidian4.Notice("Invalid Folder Path");
+        new import_obsidian4.Notice(this.tr("notice.invalidPath"));
         return;
       }
       if (!exportedFiles.length) {
-        new import_obsidian4.Notice("Folder does not have any Moon+ Reader exports!");
+        new import_obsidian4.Notice(this.tr("notice.noExports"));
         return;
       }
       const suggesterModal = new ExportSelecter(this.app, exportedFiles);
       const mrexptChoice = yield suggesterModal.openAndGetValue().catch((e) => {
-        new import_obsidian4.Notice("Prompt cancelled");
+        new import_obsidian4.Notice(this.tr("notice.promptCancelled"));
       });
       if (!mrexptChoice) {
         return;
       }
       const parsedOutput = parse(yield this.app.vault.read(mrexptChoice));
       if (!parsedOutput || parsedOutput.length === 0) {
-        new import_obsidian4.Notice("Nothing added!");
+        new import_obsidian4.Notice(this.tr("notice.nothingAdded"));
         return;
       }
       const colorsInFile = new Set();
-      parsedOutput.forEach((t) => colorsInFile.add(t.signedColor));
+      parsedOutput.forEach((t2) => colorsInFile.add(t2.signedColor));
       let mappingsChanged = false;
       for (const color of colorsInFile) {
         if (!this.settings.colorMappings.some((m) => m.signedColor === color)) {
@@ -502,10 +659,10 @@ var MoonReader = class extends import_obsidian4.Plugin {
         yield this.saveSettings();
       }
       const relevantMappings = this.settings.colorMappings.filter((m) => colorsInFile.has(m.signedColor));
-      const colorModal = new ColorPicker(this.app, relevantMappings);
+      const colorModal = new ColorPicker(this.app, relevantMappings, this.settings.language);
       const selectedMappings = yield colorModal.openAndGetValue().catch(() => null);
       if (!selectedMappings || selectedMappings.length === 0) {
-        new import_obsidian4.Notice("No colors selected!");
+        new import_obsidian4.Notice(this.tr("notice.noColors"));
         return;
       }
       for (const mapping of this.settings.colorMappings) {

@@ -6,11 +6,13 @@ import { SettingsTab } from './settings';
 import { ColorPicker } from 'src/colorpicker';
 import { ColorMapping } from 'src/types';
 import integerToRGBA from './util';
+import { t, Lang } from './strings';
 
 export interface MoonReaderSettings {
     exportsPath: string;
     enableSRSSupport: boolean;
     includeFrontmatter: boolean;
+    language: Lang;
     colorMappings: ColorMapping[];
 }
 
@@ -28,6 +30,7 @@ const MOONREADER_DEFAULT_SETTINGS: MoonReaderSettings = {
     exportsPath: 'Book Exports',
     enableSRSSupport: false,
     includeFrontmatter: true,
+    language: 'zh',
     colorMappings: DEFAULT_COLOR_MAPPINGS,
 }
 
@@ -48,10 +51,15 @@ export default class MoonReader extends Plugin {
         this.addSettingTab(new SettingsTab(this.app, this));
     }
 
+    /** Convenience i18n helper using the current language setting */
+    tr(key: string, ...args: (string | number)[]): string {
+        return t(this.settings.language, key, ...args);
+    }
+
     async start() {
         const currentTFile = this.app.workspace.getActiveFile();
         if (!currentTFile) {
-            new Notice("No active file!");
+            new Notice(this.tr('notice.noActiveFile'));
             return;
         }
         const rootPath: string = this.settings.exportsPath;
@@ -68,21 +76,22 @@ export default class MoonReader extends Plugin {
                 )
                 .map(t => t as TFile);
         } else {
-            new Notice("Invalid Folder Path");
+            new Notice(this.tr('notice.invalidPath'));
             return;
         }
         if (!exportedFiles.length) {
-            new Notice("Folder does not have any Moon+ Reader exports!");
+            new Notice(this.tr('notice.noExports'));
             return;
         }
         const suggesterModal = new ExportSelecter(this.app, exportedFiles);
-        const mrexptChoice = await suggesterModal.openAndGetValue().catch(e => { new Notice("Prompt cancelled"); }) as TFile;
+        const mrexptChoice = await suggesterModal.openAndGetValue()
+            .catch(e => { new Notice(this.tr('notice.promptCancelled')); }) as TFile;
         if (!mrexptChoice) {
             return;
         }
         const parsedOutput = parse(await this.app.vault.read(mrexptChoice));
         if (!parsedOutput || parsedOutput.length === 0) {
-            new Notice("Nothing added!");
+            new Notice(this.tr('notice.nothingAdded'));
             return;
         }
 
@@ -113,12 +122,12 @@ export default class MoonReader extends Plugin {
         );
 
         // Show multi-select color picker with callout previews
-        const colorModal = new ColorPicker(this.app, relevantMappings);
+        const colorModal = new ColorPicker(this.app, relevantMappings, this.settings.language);
         const selectedMappings = await colorModal.openAndGetValue()
             .catch(() => null) as ColorMapping[] | null;
         
         if (!selectedMappings || selectedMappings.length === 0) {
-            new Notice("No colors selected!");
+            new Notice(this.tr('notice.noColors'));
             return;
         }
 

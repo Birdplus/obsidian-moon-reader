@@ -1,107 +1,111 @@
-# Obsidian Moon Reader (Fork)
+# Obsidian Moon Reader
 
-将静读天下（Moon+ Reader）的标注导出文件（`.mrexpt`）导入 Obsidian，支持**自定义颜色映射**、**多色导入**、**自定义 Callout 标题**。
+Import Moon+ Reader annotations (`.mrexpt` files) into Obsidian with **customizable color-to-callout mapping**, **multi-color import**, and **custom callout titles**.
 
-> 这是 [AB1908/obsidian-moon-reader](https://github.com/AB1908/obsidian-moon-reader) 的 Fork，原项目已不维护。本 Fork 增加了颜色映射配置、多色导入、表头开关、自定义标题等功能。
+> This is a fork of [AB1908/obsidian-moon-reader](https://github.com/AB1908/obsidian-moon-reader) (no longer maintained). Key additions: color mapping config, multi-color import, frontmatter toggle, custom callout titles, and i18n support.
 
-## 功能亮点
+[中文文档](./README.zh.md)
 
-### ✨ 颜色 → Callout 映射
-在设置里把每种高亮颜色映射到 Obsidian Callout 类型：
+## Features
 
-| 颜色 | 映射 Callout | 自定义标题 |
-|------|-------------|-----------|
-| 🟤 灰色标注 | `[!cite]` | 章节索引（可选） |
-| 🔵 蓝色标注 | `[!quote]` | 重点摘录（可选） |
-| 🟣 紫色标注 | `[!note]` | — |
-| 🟠 橙色标注 | `[!warning]` | 需要验证（可选） |
+### 🎨 Color → Callout Mapping
+Map each Moon+ Reader highlight color to any Obsidian callout type:
 
-### ✅ 多色同时导入
-不再只能选一种颜色——所有颜色可以一次性导入，每种颜色对应不同的 Callout。
+| Color | Callout | Custom Title |
+|-------|---------|-------------|
+| Grey | `[!cite]` | Chapter (optional) |
+| Blue | `[!quote]` | Highlight (optional) |
+| Purple | `[!note]` | — |
+| Orange | `[!warning]` | Verify (optional) |
 
-### 🏷️ 自定义 Callout 标题
-支持在 Callout 右侧添加自定义标题：`> [!quote] 我的标题`
+### ✅ Multi-Color Import
+Import all highlight colors at once — each mapped to a distinct callout type.
 
-### 🔄 表头开关
-你可以在设置里关闭 YAML 表头，完全用自己的笔记结构。
+### 🏷️ Custom Callout Titles
+Add an optional title: `> [!quote] My Title` instead of bare `> [!quote]`.
 
-### 📁 增量导入
-每次执行 "Parse an export" 会在当前文件末尾追加内容，不会覆盖已有的笔记。
+### 🔄 Frontmatter Toggle
+Disable YAML frontmatter in settings if you prefer your own note structure.
 
-## 安装
+### 📄 Incremental Append
+Each "Parse an export" run appends to the current file — never overwrites existing notes.
 
-### 通过 BRAT 安装（推荐）
+### 🌐 Bilingual UI
+Switch between **English** and **中文** in plugin settings.
 
-1. 安装 [Obsidian42 - BRAT](https://github.com/TfTHacker/obsidian42-brat) 社区插件
-2. 在 BRAT 设置中添加 Beta 插件：
+## Installation
+
+### Via BRAT (recommended)
+
+1. Install [Obsidian42 - BRAT](https://github.com/TfTHacker/obsidian42-brat) from Community Plugins
+2. In BRAT settings, add this beta plugin URL:
    ```
    https://github.com/Birdplus/obsidian-moon-reader
    ```
-3. 在社区插件列表中启用 **Obsidian Moon Reader**
+3. Enable **Obsidian Moon Reader** from Community Plugins list
 
-### 手动安装
+### Manual
 
-从 [Releases](https://github.com/Birdplus/obsidian-moon-reader/releases) 下载 `main.js`、`manifest.json`、`styles.css`，放入你的 Vault 的 `.obsidian/plugins/obsidian-moon-reader/` 目录。
+Download `main.js`, `manifest.json`, `styles.css` from the [latest release](https://github.com/Birdplus/obsidian-moon-reader/releases) and place them in your vault at `.obsidian/plugins/obsidian-moon-reader/`.
 
-## 使用
+## Usage
 
-### 前提
+### Prerequisites
 
-1. 在静读天下（Moon+ Reader）中导出标注，产生 `.mrexpt` 文件
-2. 将 `.mrexpt` 文件放入你的 Obsidian Vault 中的一个文件夹（默认 `Book Exports`）
+1. Export annotations from Moon+ Reader (静读天下) to generate `.mrexpt` files
+2. Place `.mrexpt` files inside your Obsidian vault (default folder: `Book Exports`)
 
-### 步骤
+### Steps
 
-1. 在 Obsidian 中打开或创建一个笔记
-2. 打开命令面板，运行 **"Parse an export"**（或点击左侧书图标）
-3. 选择要导入的 `.mrexpt` 文件
-4. **选择要导入的颜色**（多选）→ 点击 **Import Selected**
-5. 标注内容自动追加到当前笔记末尾
+1. Open or create a note in Obsidian
+2. Run **"Parse an export"** from the command palette (or click the book icon in the ribbon)
+3. Select the `.mrexpt` file to process
+4. **Choose which colors to import** (multi-select) → click **Import Selected**
+5. Annotations are appended to the current note
 
-### 设置
+### Settings
 
-打开 Obsidian 设置 → **Moon Reader**：
+Open Obsidian Settings → **Moon Reader**:
 
-- **Book Exports Path** — `.mrexpt` 文件存放的文件夹
-- **Include file header (frontmatter)** — 是否在输出中添加 YAML 表头
-- **Color → Callout Mapping** — 配置颜色映射表
+- **Language / 语言** — Switch UI between English and Chinese
+- **Book Exports Path** — Folder where `.mrexpt` files are stored
+- **Include file header (frontmatter)** — Toggle YAML frontmatter on/off
+- **Color → Callout Mapping** — Configure the color mapping table
 
-### 输出示例
+### Output Example
 
 ```markdown
-> [!quote] 重点摘录
-> 这是书中原文高亮内容
+> [!quote] Highlight
+> The original text from the book
 > ***
-> 这是我写的笔记
+> My personal note
 
-> [!warning] 需要验证
-> 另一段高亮
-> ***
-> 对这段内容的评论
+> [!warning] Verify
+> Another highlighted passage
 ```
 
-## SRS 支持
+## SRS Support
 
-开启设置中的 SRS 开关后，输出格式变为与 Spaced Repetition 插件兼容的格式：
+Enable the SRS toggle in settings for compatibility with the [Obsidian Spaced Repetition](https://github.com/AB1908/obsidian-spaced-repetition/) plugin:
 
 ```markdown
 > [!notes] 12345
-> 高亮内容
+> Highlight text
 > ***
-> 笔记内容
+> Note text
 ```
 
-章节标题标记（在 Moon+ Reader 中将笔记设为 `#`、`##`、`###`）会转换为 Obsidian 的标题。
+Chapter markers (`#` → H1, `##` → H2, `###` → H3) in Moon+ Reader notes are converted to Obsidian headings.
 
-## 开发
+## Development
 
 ```bash
 git clone https://github.com/Birdplus/obsidian-moon-reader.git
 cd obsidian-moon-reader
 npm install
-npm run dev    # 开发模式
-npm run build  # 编译
-npm test       # 运行测试
+npm run dev     # watch mode
+npm run build   # production build
+npm test        # run tests
 ```
 
 ## License
