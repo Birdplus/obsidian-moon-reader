@@ -47,7 +47,7 @@ export class SettingsTab extends PluginSettingTab {
                 frag.createEl(
                     "a",
                     {
-                        text: "AB1908's new SRS plugin",
+                        text: "the Obsidian Spaced Repetition plugin",
                         href: "https://github.com/AB1908/obsidian-spaced-repetition/",
                     },
                     (a) => {

@@ -16,7 +16,7 @@
 		}
 	},
 	"keywords": [],
-	"author": "AB1908",
+	"author": "Birdplus (forked from AB1908)",
 	"license": "MIT",
 	"devDependencies": {
 		"@gxl/epub-parser": "^2.0.4",

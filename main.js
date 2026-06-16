@@ -248,7 +248,7 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
     new import_obsidian2.Setting(containerEl).setName("Experimental Support for SRS").setDesc(createFragment((frag) => {
       frag.appendText("Enable support for ");
       frag.createEl("a", {
-        text: "AB1908's new SRS plugin",
+        text: "the Obsidian Spaced Repetition plugin",
         href: "https://github.com/AB1908/obsidian-spaced-repetition/"
       }, (a) => {
         a.setAttr("target", "_blank");

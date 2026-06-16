@@ -1,10 +1,10 @@
 {
 	"id": "obsidian-moon-reader",
 	"name": "Obsidian Moon Reader",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"minAppVersion": "0.16.0",
 	"description": "This plugin will help you use your Moon+ Reader exports in Obsidian.",
-	"author": "AB1908",
-	"authorUrl": "https://github.com/AB1908",
+	"author": "Birdplus (forked from AB1908)",
+	"authorUrl": "https://github.com/Birdplus",
 	"isDesktopOnly": false
 }
