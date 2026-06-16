@@ -58,6 +58,16 @@ export class SettingsTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
+            .setName(this.tr('settings.timestamp'))
+            .setDesc(this.tr('settings.timestampDesc'))
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.showTimestampInCallout)
+                .onChange(async (value) => {
+                    this.plugin.settings.showTimestampInCallout = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
             .setName(this.tr('settings.srs'))
             .setDesc(this.tr('settings.srsDesc'))
             .addToggle(toggle =>

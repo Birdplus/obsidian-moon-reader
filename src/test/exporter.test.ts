@@ -14,12 +14,12 @@ const colorMappings: ColorMapping[] = [
 
 test("exporter.generateOutput with frontmatter", () => {
 	const list = Array.from(listOfAnnotations);
-	expect(generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, colorMappings, false, true)).toMatchSnapshot();
+	expect(generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, colorMappings, false, true, false)).toMatchSnapshot();
 });
 
 test("exporter.generateOutput without frontmatter", () => {
 	const list = Array.from(listOfAnnotations);
-	expect(generateOutput((list as Annotation[]), ((mrexptTFile as unknown) as TFile), colorMappings, false, false)).toMatchInlineSnapshot(`
+	expect(generateOutput((list as Annotation[]), ((mrexptTFile as unknown) as TFile), colorMappings, false, false, false)).toMatchInlineSnapshot(`
 "> [!cite]
 > INTRODUCTION
 
@@ -118,14 +118,23 @@ test("exporter generateOutput with callout title", () => {
 	const mappingsWithTitle: ColorMapping[] = [
 		{ signedColor: colorFilter, calloutType: "cite", calloutTitle: "Chapter", enabled: true },
 	];
-	const output = generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, mappingsWithTitle, false, false);
+	const output = generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, mappingsWithTitle, false, false, false);
 	expect(output).toContain("[!cite] Chapter");
 	expect(output).not.toContain("---");
 });
 
+test("exporter generateOutput with timestamp", () => {
+	const list = Array.from(listOfAnnotations);
+	// The test data has no unixTimestamp, so enabling the feature should
+	// still produce clean output without timestamps
+	const output = generateOutput(list as Annotation[], mrexptTFile as unknown as TFile, colorMappings, false, false, true);
+	expect(output).toContain("[!cite]");
+	expect(output).not.toContain("undefined");
+});
+
 test("exporter new experimental output", () => {
 	const list = Array.from(listOfAnnotations);
-	expect(generateOutput((list as Annotation[]), ((mrexptTFile as unknown) as TFile), colorMappings, true, true)).toMatchInlineSnapshot(`
+	expect(generateOutput((list as Annotation[]), ((mrexptTFile as unknown) as TFile), colorMappings, true, true, false)).toMatchInlineSnapshot(`
 "---
 path: "Book Exports/Sönke Ahrens - How to Take Smart Notes_ One Simple Technique to Boost Writing,  Learning and Thinking-Sönke Ahrens (2022).mrexpt"
 title: "How to Take Smart Notes. One Simple Technique to Boost Writing,  Learning and Thinking"

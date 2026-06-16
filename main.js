@@ -144,7 +144,19 @@ function integerToRGBA(number) {
 }
 
 // src/exporter.ts
-function generateOutput(listOfAnnotations, mrexptTFile, colorMappings, enableNewExporter, includeFrontmatter) {
+function formatTimestamp(unixTimestamp) {
+  const ms = parseInt(unixTimestamp, 10);
+  if (isNaN(ms))
+    return "";
+  const date = new Date(ms);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  const h = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `[[${y}-${m}-${d}]] ${h}:${min}`;
+}
+function generateOutput(listOfAnnotations, mrexptTFile, colorMappings, enableNewExporter, includeFrontmatter, showTimestampInCallout) {
   const sample = listOfAnnotations[0];
   if (!sample)
     return "";
@@ -173,14 +185,14 @@ tags:
   const filteredAnnotations = listOfAnnotations.filter((a) => selectedColors.has(a.signedColor));
   for (const annotation of filteredAnnotations) {
     if (annotation.highlightText || annotation.noteText) {
-      output += `${template(annotation, enableNewExporter, colorToCallout)}
+      output += `${template(annotation, enableNewExporter, colorToCallout, showTimestampInCallout)}
 `;
     }
   }
   return output;
 }
-function template(annotation, enableNewExporter, colorToCallout) {
-  let { indexCount, highlightText: highlight, noteText: note, signedColor } = annotation;
+function template(annotation, enableNewExporter, colorToCallout, showTimestampInCallout) {
+  let { indexCount, highlightText: highlight, noteText: note, signedColor, unixTimestamp } = annotation;
   if (enableNewExporter) {
     if (note.trim() === "#") {
       return `# ${highlight.replace("\n", ": ")}
@@ -207,8 +219,15 @@ ${note.split("\n").map((t2) => `> ${t2}`).join("\n")}
       highlight = highlight.replaceAll("\n", "\n> ");
     }
     let calloutHeader = `> [!${calloutType}]`;
+    const parts = [];
     if (calloutTitle) {
-      calloutHeader += ` ${calloutTitle}`;
+      parts.push(calloutTitle);
+    }
+    if (showTimestampInCallout && unixTimestamp) {
+      parts.push(formatTimestamp(unixTimestamp));
+    }
+    if (parts.length > 0) {
+      calloutHeader += " " + parts.join(" ");
     }
     let result = `${calloutHeader}
 `;
@@ -324,6 +343,14 @@ var strings = {
     en: ". This will change the output format.",
     zh: "\u3002\u5F00\u542F\u540E\u4F1A\u6539\u53D8\u8F93\u51FA\u683C\u5F0F\u3002"
   },
+  "settings.timestamp": {
+    en: "Show annotation timestamp in callout title",
+    zh: "\u5728 Callout \u6807\u9898\u4E2D\u663E\u793A\u6807\u6CE8\u65F6\u95F4"
+  },
+  "settings.timestampDesc": {
+    en: "Append the annotation date (e.g. [[2026-04-27]] 22:50) to the callout title.",
+    zh: "\u5728 Callout \u6807\u9898\u540E\u8FFD\u52A0\u6807\u6CE8\u65E5\u671F\uFF0C\u5982 [[2026-04-27]] 22:50\u3002"
+  },
   "picker.title": {
     en: "Select colors to import",
     zh: "\u9009\u62E9\u8981\u5BFC\u5165\u7684\u989C\u8272"
@@ -401,6 +428,10 @@ var SettingsTab = class extends import_obsidian2.PluginSettingTab {
     })));
     new import_obsidian2.Setting(containerEl).setName(this.tr("settings.frontmatter")).setDesc(this.tr("settings.frontmatterDesc")).addToggle((toggle) => toggle.setValue(this.plugin.settings.includeFrontmatter).onChange((value) => __async(this, null, function* () {
       this.plugin.settings.includeFrontmatter = value;
+      yield this.plugin.saveSettings();
+    })));
+    new import_obsidian2.Setting(containerEl).setName(this.tr("settings.timestamp")).setDesc(this.tr("settings.timestampDesc")).addToggle((toggle) => toggle.setValue(this.plugin.settings.showTimestampInCallout).onChange((value) => __async(this, null, function* () {
+      this.plugin.settings.showTimestampInCallout = value;
       yield this.plugin.saveSettings();
     })));
     new import_obsidian2.Setting(containerEl).setName(this.tr("settings.srs")).setDesc(this.tr("settings.srsDesc")).addToggle((toggle) => toggle.setValue(this.plugin.settings.enableSRSSupport).onChange((value) => __async(this, null, function* () {
@@ -585,6 +616,7 @@ var MOONREADER_DEFAULT_SETTINGS = {
   exportsPath: "Book Exports",
   enableSRSSupport: false,
   includeFrontmatter: true,
+  showTimestampInCallout: true,
   language: "zh",
   colorMappings: DEFAULT_COLOR_MAPPINGS
 };
@@ -669,7 +701,7 @@ var MoonReader = class extends import_obsidian4.Plugin {
         mapping.enabled = selectedMappings.some((sm) => sm.signedColor === mapping.signedColor);
       }
       yield this.saveSettings();
-      const output = generateOutput(parsedOutput, mrexptChoice, selectedMappings, this.settings.enableSRSSupport, this.settings.includeFrontmatter);
+      const output = generateOutput(parsedOutput, mrexptChoice, selectedMappings, this.settings.enableSRSSupport, this.settings.includeFrontmatter, this.settings.showTimestampInCallout);
       yield this.app.vault.append(currentTFile, output);
       new import_obsidian4.Notice(`Imported ${parsedOutput.filter((a) => selectedMappings.some((m) => m.signedColor === a.signedColor)).length} annotations (${selectedMappings.length} colors)`);
     });

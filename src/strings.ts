@@ -99,6 +99,14 @@ const strings: Record<string, Record<Lang, string>> = {
         en: '. This will change the output format.',
         zh: '。开启后会改变输出格式。',
     },
+    'settings.timestamp': {
+        en: 'Show annotation timestamp in callout title',
+        zh: '在 Callout 标题中显示标注时间',
+    },
+    'settings.timestampDesc': {
+        en: 'Append the annotation date (e.g. [[2026-04-27]] 22:50) to the callout title.',
+        zh: '在 Callout 标题后追加标注日期，如 [[2026-04-27]] 22:50。',
+    },
 
     // --- Color picker modal ---
     'picker.title': {

@@ -12,6 +12,7 @@ export interface MoonReaderSettings {
     exportsPath: string;
     enableSRSSupport: boolean;
     includeFrontmatter: boolean;
+    showTimestampInCallout: boolean;
     language: Lang;
     colorMappings: ColorMapping[];
 }
@@ -30,6 +31,7 @@ const MOONREADER_DEFAULT_SETTINGS: MoonReaderSettings = {
     exportsPath: 'Book Exports',
     enableSRSSupport: false,
     includeFrontmatter: true,
+    showTimestampInCallout: true,
     language: 'zh',
     colorMappings: DEFAULT_COLOR_MAPPINGS,
 }
@@ -144,6 +146,7 @@ export default class MoonReader extends Plugin {
             selectedMappings,
             this.settings.enableSRSSupport,
             this.settings.includeFrontmatter,
+            this.settings.showTimestampInCallout,
         );
 
         await this.app.vault.append(currentTFile, output);
